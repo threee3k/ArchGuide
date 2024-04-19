@@ -1,0 +1,88 @@
+--Set keyboard
+localectl set-keymap azerty
+--For Wi-Fi i recommend using ethernet (you can use your phone for that) 
+
+--See partitions
+lsblk
+--Set your partitions
+cfdisk /dev/sda
+
+--Format them
+mkfs.ext4 /dev/sda1
+mkfs.ext4 /dev/sda1
+
+-- Mounting
+mount /dev/sda2 /mnt
+mkdir /mnt/boot
+mount /dev/sda1 /mnt/boot
+lsblk
+
+-- Installing necessary stuff, such as kernel, dev tools and most importantly vim, or nano if you're a glowie
+pacstrap /mnt base base-devel linux linux-firmware vim nano
+genfstab /mnt
+genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt
+
+-- Chrooting, aka you can use your OS, everything below this is optional
+arch-chroot /mnt /bin/bash
+
+-- Installing helpful stuff
+pacman -S networkmanager grub
+systemctl enable NetworkManager
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+**if linux image,initrd,fallback is not found, you did not pacstrap your kernel go do that**
+
+-- Setting root password
+passwd
+
+-- Editing stuff,  you may use nano instead of vim
+vim /etc/locale.gen
+**change languages and such, uncomment en_us UTF and ISO**
+locale-gen
+
+
+-- Type this in the empty file, "LANG=en_US.UTF-8"
+vim /etc/locale.conf
+
+-- Set Hostname, write any name there
+vim /etc/hostname
+
+-- Set timezone
+ln -sf /usr/share/zoneinfo/YOURREGION/YOURCITY
+exit
+
+-- Unmounting
+umount -R /mnt
+reboot
+
+-- Congrats, you have arch, Now installing the desktop env and users
+-- Creating users
+
+useradd -mg wheel *NAME*
+-- Set password for users and give them sudo
+
+passwd *NAME*
+vim /etc/sudoers.d  ** add "Defaults !tty_tickets" UNCOMMENT "%wheel ALL=(ALL) ALL" , "%wheel ALL=(ALL) NOPASSWD: ALL" , "%sudo ALL=(ALL) ALL" **
+
+-- Adding the desktop env, we will be using xfce
+pacman -Syu
+pacman -S xorg xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+
+-- Enabling lightdm
+systemctl enable lightdm
+reboot
+
+-- Congrats, you now have Arch OS with a dekstop env, make sure you brag about it with neofetch!
+
+
+
+
+
+
+
+
+
+
+
+
